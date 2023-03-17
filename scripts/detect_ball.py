@@ -28,8 +28,8 @@ if __name__ == '__main__':
 	img_sub = rospy.Subscriber("/camera/color/image_raw", Image, get_image) 
 	img_pub = rospy.Publisher('/Ball_2D', Image, queue_size = 1)
 	
-	crop_img = np.zeros((720, 1280, 3), dtype = "uint8")
-	crop_img = cv2.rectangle(crop_img, (100, 100), (620, 1180), (255, 255, 255))
+	crop_img = np.zeros((720, 1280, 1), dtype = "uint8")
+	crop_img = cv2.rectangle(crop_img, (120, 120), (crop_img.shape[0]-120, crop_img.shape[1]-120), 255, -1)
 	
 	# set the loop frequency
 	rate = rospy.Rate(10)
@@ -45,7 +45,7 @@ if __name__ == '__main__':
 			# filter the image 
 			yellow_mask = cv2.inRange(hsv, lower_yellow_hsv, upper_yellow_hsv)
 			
-			cropped_hsv = cv2.bitwise_and(yellow_mask, crop_img)
+			cropped_hsv = cv2.bitwise_and(yellow_mask, yellow_mask, mask=crop_img)
 			# convert it to ros msg and publish itcd
 			img_msg = CvBridge().cv2_to_imgmsg(cropped_hsv, encoding="mono8")
 			# publish the image

@@ -56,6 +56,9 @@ def main():
 				ball = circles[0][0]
 				ball = np.uint16(np.around(ball)) 
 				cv2.circle(circ_detect, (ball[0], ball[1]), 1, 255, ball[2]*2)
+				
+				# draw circle on top of ball in original image
+				cv2.circle(cropped_hsv, (ball[0], ball[1]), 1, 255, ball[2]*2)
 			
 			# convert cropped img to ros msg and publish it
 			img_msg = CvBridge().cv2_to_imgmsg(cropped_hsv, encoding="mono8")

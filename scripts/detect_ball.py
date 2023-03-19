@@ -22,14 +22,15 @@ def get_image(ros_img):
 	img_received = True
 
 	
-if __name__ == '__main__':
-	# define the node and subcribers and publishers
+def main():
+	# define the node, subcribers, and publishers
 	rospy.init_node('detect_ball', anonymous = True)
 	img_sub = rospy.Subscriber("/camera/color/image_raw", Image, get_image) 
 	img_pub = rospy.Publisher('/Ball_2D', Image, queue_size = 1)
 	
-	crop_img = np.zeros((720, 1280, 1), dtype = "uint8")
-	crop_img = cv2.rectangle(crop_img, (120, 120), (crop_img.shape[0]-120, crop_img.shape[1]-120), 255, -1)
+	# create a focus window to isolate ball movement from background
+	crop_img = np.zeros((rgb_img.shape[1], rgb_img.shape[0], 1), dtype = "uint8")
+	crop_img = cv2.rectangle(crop_img, (120, 120), (crop_img.shape[1]-120, crop_img.shape[0]-120), 255, -1)
 	
 	# set the loop frequency
 	rate = rospy.Rate(10)
@@ -37,7 +38,6 @@ if __name__ == '__main__':
 	while not rospy.is_shutdown():
 		# make sure we process if the camera has started streaming images
 		if img_received:
-		
 			hsv = cv2.cvtColor(rgb_img, cv2.COLOR_RGB2HSV)
 			# define the upper and lower ranges
 			lower_yellow_hsv = np.array([20,5,1])

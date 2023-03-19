@@ -47,13 +47,11 @@ def main():
 			# crop image to inner defined area to remove background objects
 			cropped_hsv = cv2.bitwise_and(yellow_mask, yellow_mask, mask=crop_img)
 			
-			# detect circles in img
+			# detect circles in img using Hough Circle detection algorithm
 			circles = cv2.HoughCircles(cropped_hsv, cv2.HOUGH_GRADIENT, 1, cropped_hsv.shape[0]/8, param1=40, param2=10, minRadius=50, maxRadius=80)
-			
 			# create empty img to store circle in clean img
 			circ_detect = np.zeros((rgb_img.shape[0], rgb_img.shape[1], 1), dtype = "uint8")
-			
-			# draw largest detected circle
+			# draw largest detected circle in empty img
 			if circles is not None:
 				ball = circles[0][0]
 				ball = np.uint16(np.around(ball)) 

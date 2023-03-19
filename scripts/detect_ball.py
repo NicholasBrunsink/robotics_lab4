@@ -6,6 +6,7 @@ from cv_bridge import CvBridge
 from sensor_msgs.msg import Image
 
 # Code adapted from flip_image.py and lecture code
+# help also recieved from docs.opencv.org for circle detection
 
 img_received = False
 # define a 720x1280 3-channel image with all pixels equal to zero
@@ -29,12 +30,11 @@ def main():
 	img_pub = rospy.Publisher('/Ball_2D', Image, queue_size = 1)
 	
 	# create a focus window to isolate ball movement from background
-	crop_img = np.zeros((rgb_img.shape[1], rgb_img.shape[0], 1), dtype = "uint8")
+	crop_img = np.zeros((rgb_img.shape[0], rgb_img.shape[1], 1), dtype = "uint8")
 	crop_img = cv2.rectangle(crop_img, (120, 120), (crop_img.shape[1]-120, crop_img.shape[0]-120), 255, -1)
 	
 	# set the loop frequency
 	rate = rospy.Rate(10)
-
 	while not rospy.is_shutdown():
 		# make sure we process if the camera has started streaming images
 		if img_received:
@@ -44,12 +44,26 @@ def main():
 			upper_yellow_hsv = np.array([60,255,255])
 			# filter the image 
 			yellow_mask = cv2.inRange(hsv, lower_yellow_hsv, upper_yellow_hsv)
-			
+			# crop image to inner defined area to remove background objects
 			cropped_hsv = cv2.bitwise_and(yellow_mask, yellow_mask, mask=crop_img)
-			# convert it to ros msg and publish itcd
+			
+			# detect circles in img
+			circles = cv2.HoughCircles(cropped_hsv, cv2.HOUGH_GRADIENT, 1, cropped_hsv.shape[0]/8, param1=40, param2=10, minRadius=50, maxRadius=80)
+			
+			# create empty img to store circle in clean img
+			circ_detect = np.zeros((rgb_img.shape[0], rgb_img.shape[1], 1), dtype = "uint8")
+			
+			# draw largest detected circle
+			if circles is not None:
+				ball = circles[0][0]
+				ball = np.uint16(np.around(ball)) 
+				cv2.circle(circ_detect, (ball[0], ball[1]), 1, 255, ball[2]*2)
+			
+			# convert cropped img to ros msg and publish it
 			img_msg = CvBridge().cv2_to_imgmsg(cropped_hsv, encoding="mono8")
-			# publish the image
+			# publish final cropped img
 			img_pub.publish(img_msg)
 			
 		# pause until the next iteration			
 		rate.sleep()
+main()

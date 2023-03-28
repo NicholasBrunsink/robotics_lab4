@@ -27,7 +27,7 @@ def main():
 	# define the node, subcribers, and publishers
 	rospy.init_node('detect_ball', anonymous = True)
 	img_sub = rospy.Subscriber("/camera/color/image_raw", Image, get_image) 
-	img_pub = rospy.Publisher('/Ball_2D', Image, queue_size = 1)
+	img_pub = rospy.Publisher('/ball_2D', Image, queue_size = 1)
 	
 	# create a focus window to isolate ball movement from background
 	crop_img = np.zeros((rgb_img.shape[0], rgb_img.shape[1], 1), dtype = "uint8")
